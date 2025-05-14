@@ -5,7 +5,7 @@
       <span
         v-for="(letter, index) in letters"
         :key="index"
-        :class="{ correct: index < correctIndex, current: index === correctIndex }"
+        :class="{ correct: result[index] === 'correct', incorrect: result[index] === 'incorrect' }"
       >
         {{ letter }}
       </span>
@@ -26,6 +26,7 @@ export default {
     return {
       timeLeft: 10,
       letters: [],
+      result: [], // 用于记录每个字母的输入结果
       correctIndex: 0,
       errors: 0,
       totalTyped: 0,
@@ -52,8 +53,9 @@ export default {
     },
     generateLetters() {
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      this.letters = Array.from({ length: 10 }, () => letters[Math.floor(Math.random() * letters.length)]);
+      this.letters = Array.from({ length: 15 }, () => letters[Math.floor(Math.random() * letters.length)]);
       this.correctIndex = 0;
+      this.result = Array(this.letters.length).fill(null); // 初始化结果数组
     },
     handleKeyInput(event) {
       if (!this.gameOver && this.correctIndex < this.letters.length) {
@@ -63,14 +65,16 @@ export default {
         this.totalTyped += 1;
         if (inputLetter === correctLetter) {
           this.correctTyped += 1;
-          this.correctIndex += 1;
-
-          // 如果所有字母都输入正确，重新生成一排字母
-          if (this.correctIndex === this.letters.length) {
-            this.generateLetters();
-          }
+          this.result[this.correctIndex] = 'correct'; // 标记为正确
         } else {
           this.errors += 1;
+          this.result[this.correctIndex] = 'incorrect'; // 标记为错误
+        }
+        this.correctIndex += 1;
+
+        // 如果所有字母都输入完成，重新生成一排字母
+        if (this.correctIndex === this.letters.length) {
+          this.generateLetters();
         }
       }
     },
@@ -112,8 +116,8 @@ export default {
 .correct {
   color: green;
 }
-.current {
-  color: blue;
+.incorrect {
+  color: red;
 }
 .stats {
   margin-top: 30px;
